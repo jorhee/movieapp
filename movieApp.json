@@ -1,0 +1,13 @@
+{
+    "endpoints": {
+        "login":"/login",
+        "register":"/register",
+        "addMovie": "/addMovie",
+        "getAllMovies":"/getMovies",
+        "getMovieById":"/:movieId",
+        "updateMovie":"/updateMovie/:movieId",
+        "deleteMovie":"/deleteMovie/:movieId",
+        "addMovieComment":"/addComment/:movieId",
+        "getMovieComments":"/getComments/:movieId"
+    }
+}
