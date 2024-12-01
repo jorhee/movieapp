@@ -22,7 +22,7 @@ const movieSchema = new mongoose.Schema({
         required: [true, 'Director is Required']
     },
     year: {
-        type: Number,
+        type: String,
         required: [true, 'Year is Required']
     },
     description: {
@@ -32,6 +32,10 @@ const movieSchema = new mongoose.Schema({
     genre: {
         type: String,
         required: [true, 'Genre is Required'],
+    },
+    picture: {
+    type: String, // A single string to store the path or filename of the image
+    required: [false, 'Picture is not required']
     },
     comments: [commentSchema], // Embed the comment schema here
 });

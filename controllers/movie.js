@@ -1,6 +1,41 @@
 const Movie = require("../models/Movie");
 const {errorHandler} = require("../auth");
 const User = require("../models/User");
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+
+// Ensure uploads directory exists
+const uploadDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configure multer for file storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir); // Folder where images will be stored
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // Ensure unique filenames
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png|gif/;
+    const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = fileTypes.test(file.mimetype);
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Images only!'));
+    }
+  }
+});
 
 
 module.exports.addMovie = async (req,res) => {
@@ -21,7 +56,7 @@ module.exports.addMovie = async (req,res) => {
         const { title , director, year, description, genre, comments } = req.body;
 
         // Validate required fields
-        if (!title || !director || !year || !description || !genre) {
+        if (!title || !director || !year || !description || !genre || !req.file) {
             return res.status(400).json({
                 message: 'All fields are required.',
             });
@@ -34,6 +69,7 @@ module.exports.addMovie = async (req,res) => {
             year,
             description,
             genre,
+            picture: path.join('uploads', req.file.filename), // Save the relative path
             comments
         });
 
@@ -43,13 +79,13 @@ module.exports.addMovie = async (req,res) => {
         // Respond with the saved movie
         res.status(201).json(savedMovie);
     } catch (error) {
-        // Handle server errors
-        res.status(500).json({
-            message: 'Error adding movie.',
-            error: error.message,
-        });
-    }
+    console.error(error); // Log the error for debugging
+    errorHandler(error, req, res);
+  }
 };
+
+// Middleware to handle file upload (use this in your route)
+module.exports.uploadMiddleware = upload.single('picture');
 
 
 module.exports.getAllMovies = async (req, res) => {

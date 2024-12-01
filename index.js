@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 //allows our backend app to be available to our frontend app
 //allows to control the app's CORS settings
 const cors = require("cors");
-
+const path = require('path');
 
 
 
@@ -50,6 +50,10 @@ mongoose.connection.once('open',()=>console.log("Now connected to MongoDB Atlas"
 
 app.use("/movies", movieRoutes);
 app.use("/users", userRoutes);
+
+
+// Serve static files from 'uploads' folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //[Server Gateway Response]
 if(require.main === module){
