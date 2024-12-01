@@ -38,13 +38,12 @@ const upload = multer({
 });
 
 
-module.exports.addMovie = async (req,res) => {
-
- try {
+module.exports.addMovie = async (req, res) => {
+    try {
         // Extract userId from the authenticated user
         const userId = req.user.id;
 
-         // Fetch user details to validate admin status
+        // Fetch user details to validate admin status
         const user = await User.findById(userId);
         if (!user || !user.isAdmin) {
             return res.status(403).json({
@@ -53,13 +52,20 @@ module.exports.addMovie = async (req,res) => {
         }
 
         // Extract movie details from the request body
-        const { title , director, year, description, genre, comments } = req.body;
+        const { title, director, year, description, genre } = req.body;
 
-        // Validate required fields
-        if (!title || !director || !year || !description || !genre || !req.file) {
+        // Validate required fields (excluding picture)
+        if (!title || !director || !year || !description || !genre) {
             return res.status(400).json({
-                message: 'All fields are required.',
+                message: 'All fields except picture are required.',
             });
+        }
+
+        // Initialize picture path (default to null if not provided)
+        let picturePath = null;
+        if (req.file) {
+            // If a picture file is uploaded, save its path
+            picturePath = path.join('uploads', req.file.filename);
         }
 
         // Create a new movie instance
@@ -69,20 +75,20 @@ module.exports.addMovie = async (req,res) => {
             year,
             description,
             genre,
-            picture: path.join('uploads', req.file.filename), // Save the relative path
-            comments
+            picture: picturePath, // Save picture path if available
         });
 
-        // Save the workout to the database
+        // Save the movie to the database
         const savedMovie = await newMovie.save();
 
         // Respond with the saved movie
         res.status(201).json(savedMovie);
     } catch (error) {
-    console.error(error); // Log the error for debugging
-    errorHandler(error, req, res);
-  }
+        console.error(error); // Log the error for debugging
+        errorHandler(error, req, res);
+    }
 };
+
 
 // Middleware to handle file upload (use this in your route)
 module.exports.uploadMiddleware = upload.single('picture');
@@ -90,14 +96,7 @@ module.exports.uploadMiddleware = upload.single('picture');
 
 module.exports.getAllMovies = async (req, res) => {
     try {
-        // Check if the user has admin privileges
-        if (!req.user || !req.user.isAdmin) {
-            return res.status(403).json({
-                message: 'Access denied. Admin privileges are required.',
-            });
-        }
-
-        // Fetch all movies
+        // Fetch all movies from the database
         const movies = await Movie.find();
 
         // Check if no movies were found
@@ -110,7 +109,8 @@ module.exports.getAllMovies = async (req, res) => {
 
         // Respond with the list of movies
         res.status(200).json({
-            movies: movies
+            message: 'Movies retrieved successfully.',
+            movies: movies,
         });
     } catch (error) {
         // Handle server errors
@@ -122,15 +122,23 @@ module.exports.getAllMovies = async (req, res) => {
     }
 };
 
+
 module.exports.getMovieById = async (req, res) => {
     try {
+        // Ensure the user is authenticated
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({
+                message: 'Access denied. Please log in.',
+            });
+        }
+
         // Extract the movie ID from the request parameters
         const { movieId } = req.params;
 
         // Find the movie by ID
-        const movie = await Movie.findById(movieId)
+        const movie = await Movie.findById(movieId);
 
-        // Check if the movie was found
+        // Check if the movie exists
         if (!movie) {
             return res.status(404).json({
                 message: 'Movie not found.',
@@ -139,10 +147,10 @@ module.exports.getMovieById = async (req, res) => {
 
         // Respond with the movie details
         res.status(200).json({
-            movie: movie
+            movie: movie,
         });
     } catch (error) {
-        // Log the error and send a server error response
+        // Handle server errors
         console.error("Error retrieving movie:", error);
         res.status(500).json({
             message: 'Error retrieving movie.',
@@ -150,7 +158,6 @@ module.exports.getMovieById = async (req, res) => {
         });
     }
 };
-
 
 
 

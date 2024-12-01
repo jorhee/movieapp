@@ -11,12 +11,12 @@ router.post("/addMovie", verify, verifyAdmin, isLoggedIn, movieController.upload
 
 router.get("/getMovies", movieController.getAllMovies);
 
-router.get("/getMovie/:movieId", verify, verifyAdmin, movieController.getMovieById);
+router.get("/getMovie/:movieId", verify, isLoggedIn, movieController.getMovieById);
 
 
-router.patch("/updateMovie/:movieId", verify, isLoggedIn, movieController.updateMovie);
+router.patch("/updateMovie/:movieId", verify, verifyAdmin, isLoggedIn, movieController.updateMovie);
 
-router.delete("/deleteMovie/:movieId", verify, verifyAdmin, movieController.deleteMovie);
+router.delete("/deleteMovie/:movieId", verify, verifyAdmin, isLoggedIn, movieController.deleteMovie);
 
 router.patch("/addComment/:movieId", verify, isLoggedIn, movieController.addComment);
 

@@ -35,7 +35,7 @@ const movieSchema = new mongoose.Schema({
     },
     picture: {
     type: String, // A single string to store the path or filename of the image
-    required: [false, 'Picture is not required']
+    default: null
     },
     comments: [commentSchema], // Embed the comment schema here
 });
