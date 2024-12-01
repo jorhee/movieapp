@@ -27,15 +27,15 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));   
 
 //will allow s to customize CORS options to meet our specific requirements
-const corsOptions = {
+/*const corsOptions = {
     origin: [`http://localhost:3000`], //allows request from this origin (client's URL)
     //methods: ['GET','POST'],
     credentials: true, //allow credentials (e.g. authorization headers)
     optionsSuccessStatus:200 //provides status code to use for successful OPTIONS requests
 };
 app.use(cors(corsOptions));
-
-
+*/
+app.use(cors());
 //[Database Connection]
 //Connect to our MongoDB
 mongoose.connect(process.env.MONGODB_STRING);
