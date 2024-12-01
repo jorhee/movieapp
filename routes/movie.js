@@ -11,7 +11,7 @@ router.post("/addMovie", verify, verifyAdmin, movieController.addMovie);
 
 router.get("/getMovies", verify, verifyAdmin, movieController.getAllMovies);
 
-router.get("/:movieId", verify, verifyAdmin, movieController.getMovieById);
+router.get("/getMovie/:movieId", verify, verifyAdmin, movieController.getMovieById);
 
 
 router.patch("/updateMovie/:movieId", verify, verifyAdmin, movieController.updateMovie);

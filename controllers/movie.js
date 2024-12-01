@@ -103,8 +103,7 @@ module.exports.getMovieById = async (req, res) => {
 
         // Respond with the movie details
         res.status(200).json({
-            message: 'Movie retrieved successfully.',
-            movie,
+            movie: movie
         });
     } catch (error) {
         // Log the error and send a server error response
@@ -145,7 +144,7 @@ module.exports.updateMovie = async (req, res) => {
         const updatedMovie = await Movie.findByIdAndUpdate(
             movieId, // Movie ID to update
             { title, director, year, description, genre }, // Updated fields
-            { new: true, runValidators: true } // Options: return the updated document and run validators
+            { new: true } // Options: return the updated document and run validators
         );
 
         // Check if the movie exists
@@ -219,7 +218,7 @@ module.exports.addComment = async (req, res) => {
         const { comment } = req.body;
 
         // Validate comment text
-        if (!comment || comment.trim() === '') {
+        if (!comment) {
             return res.status(400).json({
                 message: 'Comment text is required.',
             });
@@ -236,8 +235,7 @@ module.exports.addComment = async (req, res) => {
         // Create the comment object
         const comments = {
             userId,
-            comment: comment.trim(),
-            createdAt: new Date(),
+            comment
         };
 
         // Add the comment to the movie's comments array
@@ -248,7 +246,7 @@ module.exports.addComment = async (req, res) => {
 
         // Respond with the updated movie and the added comment
         res.status(200).json({
-            message: 'Comment added successfully.',
+            message: 'comment added successfully.',
             updatedMovie: updatedMovie
         });
     } catch (error) {

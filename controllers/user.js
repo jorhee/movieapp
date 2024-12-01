@@ -13,32 +13,49 @@ const {errorHandler} = require("../auth");
 
 
 
-module.exports.registerUser = (req, res) => {
+module.exports.registerUser = async (req, res) => {
 
-    // Checks if the email is in the right format
-    if (!req.body.email.includes("@")){
-        // if the email is not in the right format, send a message 'Invalid email format'.
-        return res.status(400).send({ message: 'Invalid email format' });
-    }
-    
-    // Checks if the password has atleast 8 characters
-    else if (req.body.password.length < 8) {
-        // If the password is not atleast 8 characters, send a message 'Password must be atleast 8 characters long'.
-        return res.status(400).send({ message: 'Password must be atleast 8 characters long' });
-    // If all needed requirements are achieved
-    } else {
+    try {
+        // Checks if the email is in the right format
+        if (!req.body.email.includes("@")) {
+            // if the email is not in the right format, send a message 'Invalid email format'.
+            return res.status(400).send({ message: 'Invalid email format' });
+        }
+
+        // Checks if the password has atleast 8 characters
+        if (req.body.password.length < 8) {
+            // If the password is not atleast 8 characters, send a message 'Password must be atleast 8 characters long'.
+            return res.status(400).send({ message: 'Password must be atleast 8 characters long' });
+        }
+
+        // Check if the email already exists in the database
+        const existingUser = await User.findOne({ email: req.body.email });
+
+        if (existingUser) {
+            // If the email already exists, send a message 'Email already exists'
+            return res.status(400).send({ message: 'Email already exists' });
+        }
+
+        // If the email does not exist, create a new user
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);  // Hash the password
+
         let newUser = new User({
-            email : req.body.email,
+            email: req.body.email,
             isAdmin: req.body.isAdmin,
-            password : bcrypt.hashSync(req.body.password, 10)
-        })
+            password: hashedPassword,
+        });
 
-        return newUser.save()
-        // if all needed requirements are achieved, send a success message 'User registered successfully' and return the newly created user.
-        .then((result) => res.status(201).send({
+        // Save the new user to the database
+        await newUser.save();
+
+        // Send a success message 'User registered successfully'
+        return res.status(201).send({
             message: 'Registered successfully'
-        }))
-        .catch(error => errorHandler(error, req, res));
+        });
+
+    } catch (error) {
+        // Handle any errors that occur during the process
+        return errorHandler(error, req, res);
     }
 };
 
